@@ -9,6 +9,7 @@ interface TaskColProps {
 	tasks: Task[];
 	onUpdateTaskStatus: (id: string, isDone: boolean) => void;
 	onDelete: (id: string) => void;
+	onEdit: (id: string) => void;
 }
 
 export function TaskCol({
@@ -17,6 +18,7 @@ export function TaskCol({
 	tasks,
 	onUpdateTaskStatus,
 	onDelete,
+	onEdit,
 }: TaskColProps) {
 	// Allows the column to act as a drop target
 	const handleDragOver = (e: React.DragEvent) => {
@@ -50,6 +52,7 @@ export function TaskCol({
 							task={task}
 							onUpdateTaskStatus={onUpdateTaskStatus}
 							onDelete={onDelete}
+							onEdit={onEdit}
 						/>
 					))
 				)}

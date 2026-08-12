@@ -6,14 +6,15 @@ interface TaskCardProps {
 	task: Task;
 	onUpdateTaskStatus: (id: string, isDone: boolean) => void;
 	onDelete: (id: string) => void;
+	onEdit: (id: string) => void;
 }
 
 export function TaskCard({
 	task,
 	onUpdateTaskStatus,
 	onDelete,
+	onEdit,
 }: TaskCardProps) {
-	// Packages the task ID into the drag event so the column knows what was dropped
 	const handleDragStart = (e: React.DragEvent) => {
 		e.dataTransfer.setData("taskId", task.id);
 	};
@@ -28,7 +29,6 @@ export function TaskCard({
 				<input
 					type="checkbox"
 					checked={task.done}
-					// Toggling the checkbox acts exactly like dropping it in the other column
 					onChange={(e) => onUpdateTaskStatus(task.id, e.target.checked)}
 					className="task-checkbox"
 				/>
@@ -46,11 +46,19 @@ export function TaskCard({
 							{task.description}
 						</p>
 					)}
+					{task.deadline && (
+						<p className={`task-deadline ${task.done ? "completed-text" : ""}`}>
+							Due: {new Date(task.deadline).toLocaleDateString("en-GB")}
+						</p>
+					)}
 				</div>
 			</div>
 
 			<button className="delete-btn" onClick={() => onDelete(task.id)}>
 				Delete
+			</button>
+			<button className="edit-btn" onClick={() => onEdit(task.id)}>
+				Edit
 			</button>
 		</div>
 	);
