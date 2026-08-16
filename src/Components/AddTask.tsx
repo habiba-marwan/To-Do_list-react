@@ -45,36 +45,53 @@ export function AddTask({
 	};
 
 	return (
-		<div className="modal-overlay">
-			<div className="modal-content">
-				<h2 className="modal-title">
-					{isEdit ? "let's edit your task Task" : "Let's add a new task"}
+		<div
+			className="modal-overlay"
+			onClick={onClose}
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			tabIndex={-1}
+		>
+			<div
+				className="modal-content"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="task-modal-title"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 id="task-modal-title" className="modal-title">
+					{isEdit ? "Let's edit your task" : "Let's add a new task"}
 				</h2>
 
 				<form onSubmit={handleSubmit} className="add-task-form">
 					<div className="input-group">
-						<label>Task Title</label>
+						<label htmlFor="task-title">Task Title</label>
 						<input
 							type="text"
+							id="task-title"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							placeholder="What needs to be done?"
 							required
+							maxLength={200}
+							autoFocus
 						/>
 					</div>
 
 					<div className="input-group">
-						<label>Description</label>
+						<label htmlFor="task-desc">Description</label>
 						<textarea
+							id="task-desc"
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
 							placeholder="Add some details (optional)"
+							maxLength={2000}
 						/>
 					</div>
 
 					<div className="input-group">
-						<label>Deadline</label>
+						<label htmlFor="task-deadline">Deadline</label>
 						<input
+							id="task-deadline"
 							type="date"
 							value={deadline}
 							onChange={(e) => setDeadline(e.target.value)}

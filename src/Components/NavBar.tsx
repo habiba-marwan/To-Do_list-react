@@ -32,9 +32,7 @@ export function NavBar({
 					onChange={(e) => onSort(e.target.value as "alphabetical" | "dueDate")}
 					defaultValue=""
 				>
-					<option value="" disabled hidden>
-						Sort
-					</option>
+					<option value="none">Sort (Default)</option>
 					<option value="alphabetical">Alphabetically</option>
 					<option value="dueDate">By Due Date</option>
 				</select>

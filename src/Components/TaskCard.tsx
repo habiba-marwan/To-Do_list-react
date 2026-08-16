@@ -19,6 +19,12 @@ export function TaskCard({
 		e.dataTransfer.setData("taskId", task.id);
 	};
 
+	let deadLine = "";
+	if (task.deadline) {
+		const [y, m, d] = task.deadline.split("-").map(Number);
+		deadLine = new Date(y, m - 1, d).toLocaleDateString("en-GB");
+	}
+
 	return (
 		<div
 			className={`task-card ${task.done ? "completed" : ""}`}
@@ -48,13 +54,18 @@ export function TaskCard({
 					)}
 					{task.deadline && (
 						<p className={`task-deadline ${task.done ? "completed-text" : ""}`}>
-							Due: {new Date(task.deadline).toLocaleDateString("en-GB")}
+							Due: {deadLine}
 						</p>
 					)}
 				</div>
 			</div>
 
-			<button className="delete-btn" onClick={() => onDelete(task.id)}>
+			<button
+				className="delete-btn"
+				onClick={() => {
+					if (window.confirm(`Delete "${task.title}"?`)) onDelete(task.id);
+				}}
+			>
 				Delete
 			</button>
 			<button className="edit-btn" onClick={() => onEdit(task.id)}>
