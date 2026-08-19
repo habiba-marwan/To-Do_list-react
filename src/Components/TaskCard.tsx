@@ -1,6 +1,7 @@
 import React from "react";
 import { type Task } from "../types";
 import "../App.css";
+import { APP_TEXT } from "../constants";
 
 interface TaskCardProps {
 	task: Task;
@@ -15,9 +16,16 @@ export function TaskCard({
 	onDelete,
 	onEdit,
 }: TaskCardProps) {
+	const { buttons } = APP_TEXT;
 	const handleDragStart = (e: React.DragEvent) => {
 		e.dataTransfer.setData("taskId", task.id);
 	};
+
+	let deadLine = "";
+	if (task.deadline) {
+		const [y, m, d] = task.deadline.split("-").map(Number);
+		deadLine = new Date(y, m - 1, d).toLocaleDateString("en-GB");
+	}
 
 	return (
 		<div
@@ -48,17 +56,22 @@ export function TaskCard({
 					)}
 					{task.deadline && (
 						<p className={`task-deadline ${task.done ? "completed-text" : ""}`}>
-							Due: {new Date(task.deadline).toLocaleDateString("en-GB")}
+							Due: {deadLine}
 						</p>
 					)}
 				</div>
 			</div>
 
-			<button className="delete-btn" onClick={() => onDelete(task.id)}>
-				Delete
+			<button
+				className="delete-btn"
+				onClick={() => {
+					if (window.confirm(`Delete "${task.title}"?`)) onDelete(task.id);
+				}}
+			>
+				{buttons.delete}
 			</button>
 			<button className="edit-btn" onClick={() => onEdit(task.id)}>
-				Edit
+				{buttons.edit}
 			</button>
 		</div>
 	);

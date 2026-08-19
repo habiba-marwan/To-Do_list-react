@@ -5,73 +5,62 @@ import { NavBar } from "./Components/NavBar";
 import { AddTask } from "./Components/AddTask";
 import { type Task } from "./types";
 import "./App.css";
+import { APP_TEXT } from "./constants";
 
-// so it matches the <input type="date"> format (YYYY-MM-DD)
-const date = new Date().toISOString().split("T")[0];
+// to get the current date
+function todayLocalISO() {
+	const d = new Date();
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, "0");
+	const day = String(d.getDate()).padStart(2, "0");
 
-const initialTasks: Task[] = [
-	{
-		id: "1",
-		title: "task 1",
-		description: "test task",
-		created_at: date,
-		deadline: date,
-		done: false,
-	},
-	{
-		id: "2",
-		title: "task 2",
-		description: "another test task",
-		created_at: date,
-		deadline: date,
-		done: true,
-	},
-	{
-		id: "3",
-		title: "task 3",
-		description: "another test task",
-		created_at: date,
-		deadline: date,
-		done: true,
-	},
-	{
-		id: "4",
-		title: "task 4",
-		description: "another test task",
-		created_at: date,
-		deadline: date,
-		done: true,
-	},
-	{
-		id: "5",
-		title: "task 5",
-		description: "another test task",
-		created_at: date,
-		deadline: date,
-		done: false,
-	},
-];
+	return `${y}-${m}-${day}`;
+}
 
+function parseTasks(raw: string): Task[] | null {
+	try {
+		const data = JSON.parse(raw);
+		if (!Array.isArray(data)) return null;
+		const valid = data.every(
+			(t) => t && typeof t.id === "string" && typeof t.title === "string",
+		);
+		return valid ? data : null;
+	} catch {
+		return null;
+	}
+}
 export default function App() {
+	const { columns } = APP_TEXT;
 	const [tasks, setTasks] = useState<Task[]>(() => {
 		const savedTasks = localStorage.getItem("tasks");
+
 		if (savedTasks) {
-			try {
-				return JSON.parse(savedTasks);
-			} catch (e) {
-				console.error(e);
+			const validatedTasks = parseTasks(savedTasks);
+
+			if (validatedTasks) {
+				return validatedTasks;
+			} else {
+				localStorage.removeItem("tasks");
 			}
 		}
-		return initialTasks;
+
+		return [];
 	});
 	const [isOpen, setIsOpen] = useState(false); // for the add task window
 	const [isDarkMode, setIsDarkMode] = useState(false);
 	const [isEdit, setIsEdit] = useState(false);
 	const [taskToEdit, setTaskToEdit] = useState<Task | null>();
 	const [filterDate, setFilterDate] = useState<string>("");
+	const [sortMethod, setSortMethod] = useState<
+		"none" | "alphabetical" | "dueDate"
+	>("none");
 
 	useEffect(() => {
-		localStorage.setItem("tasks", JSON.stringify(tasks));
+		try {
+			localStorage.setItem("tasks", JSON.stringify(tasks));
+		} catch {
+			// just swallowing the error to avoid crashing the app
+		}
 	}, [tasks]);
 
 	function updateTaskStatus(id: string, isDone: boolean) {
@@ -90,20 +79,21 @@ export default function App() {
 	function handleDeleteTask(id: string) {
 		setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
 	}
+	const visibleTasks = [...tasks]
+		.filter((t) => !filterDate || t.deadline === filterDate)
+		.sort((a, b) => {
+			if (sortMethod === "alphabetical") {
+				return a.title.localeCompare(b.title);
+			}
 
-	function handleSortTasks(method: "alphabetical" | "dueDate") {
-		if (method === "alphabetical") {
-			setTasks([...tasks].sort((a, b) => a.title.localeCompare(b.title)));
-		} else {
-			setTasks(
-				[...tasks].sort((a, b) => {
-					const timeA = new Date(a.deadline).getTime();
-					const timeB = new Date(b.deadline).getTime();
-					return timeA - timeB;
-				}),
-			);
-		}
-	}
+			if (sortMethod === "dueDate") {
+				const timeA = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+				const timeB = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+				return timeA - timeB;
+			}
+
+			return 0; // If sortMethod is "none", return 0 to keep original order
+		});
 
 	const handleSaveForm = (formData: {
 		title: string;
@@ -120,10 +110,10 @@ export default function App() {
 			);
 		} else {
 			const newTask: Task = {
-				id: Math.random().toString(36).substring(2, 9),
+				id: crypto.randomUUID(),
 				title: formData.title,
 				description: formData.description,
-				created_at: date,
+				created_at: todayLocalISO(),
 				deadline: formData.deadline,
 				done: false,
 			};
@@ -135,12 +125,8 @@ export default function App() {
 		setIsEdit(false);
 		setTaskToEdit(null);
 	};
-	const filteredTasks = tasks.filter((task) => {
-		if (!filterDate) return true; //  show all tasks
-		return task.deadline === filterDate; //  show tasks matching this date
-	});
-	const todoTasks = filteredTasks.filter((task) => !task.done);
-	const doneTasks = filteredTasks.filter((task) => task.done);
+	const todoTasks = visibleTasks.filter((task) => !task.done);
+	const doneTasks = visibleTasks.filter((task) => task.done);
 
 	return (
 		<div className={`page-wrapper ${isDarkMode ? "dark-theme" : ""}`}>
@@ -149,22 +135,23 @@ export default function App() {
 					setIsEdit(false);
 					setIsOpen(true);
 				}}
-				onSort={handleSortTasks}
+				onSort={setSortMethod}
 				isDarkMode={isDarkMode}
 				onToggleTheme={() => setIsDarkMode(!isDarkMode)}
 				onFilterDate={setFilterDate}
 			/>
 			<div className="board-container">
 				<TaskCol
-					title="To Do"
+					title={columns.todo}
 					isDoneColumn={false}
 					tasks={todoTasks}
 					onUpdateTaskStatus={updateTaskStatus}
 					onDelete={handleDeleteTask}
 					onEdit={handleEditTask}
 				/>
+
 				<TaskCol
-					title="Done"
+					title={columns.done}
 					isDoneColumn={true}
 					tasks={doneTasks}
 					onUpdateTaskStatus={updateTaskStatus}

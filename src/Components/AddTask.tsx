@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../App.css";
 import { type Task } from "../types";
+import { APP_TEXT } from "../constants";
 
 interface AddTaskProps {
 	isOpen: boolean;
@@ -26,7 +27,7 @@ export function AddTask({
 		initialData?.description || "",
 	);
 	const [deadline, setDeadline] = useState(initialData?.deadline || "");
-
+	const { modal, inputs, buttons } = APP_TEXT;
 	// wait till we click button
 	if (!isOpen) return null;
 
@@ -45,36 +46,53 @@ export function AddTask({
 	};
 
 	return (
-		<div className="modal-overlay">
-			<div className="modal-content">
-				<h2 className="modal-title">
-					{isEdit ? "let's edit your task Task" : "Let's add a new task"}
+		<div
+			className="modal-overlay"
+			onClick={onClose}
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			tabIndex={-1}
+		>
+			<div
+				className="modal-content"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="task-modal-title"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 id="task-modal-title" className="modal-title">
+					{isEdit ? modal.editTitle : modal.addTitle}
 				</h2>
 
 				<form onSubmit={handleSubmit} className="add-task-form">
 					<div className="input-group">
-						<label>Task Title</label>
+						<label htmlFor="task-title">{inputs.title.label}</label>
 						<input
 							type="text"
+							id="task-title"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							placeholder="What needs to be done?"
+							placeholder={inputs.title.placeholder}
 							required
+							maxLength={200}
+							autoFocus
 						/>
 					</div>
 
 					<div className="input-group">
-						<label>Description</label>
+						<label htmlFor="task-desc">{inputs.description.label}</label>
 						<textarea
+							id="task-desc"
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
-							placeholder="Add some details (optional)"
+							placeholder={inputs.description.placeholder}
+							maxLength={2000}
 						/>
 					</div>
 
 					<div className="input-group">
-						<label>Deadline</label>
+						<label htmlFor="task-deadline">{inputs.deadline.label}</label>
 						<input
+							id="task-deadline"
 							type="date"
 							value={deadline}
 							onChange={(e) => setDeadline(e.target.value)}
@@ -83,10 +101,10 @@ export function AddTask({
 
 					<div className="modal-actions">
 						<button type="button" className="cancel-btn" onClick={onClose}>
-							Cancel
+							{buttons.cancel}
 						</button>
 						<button type="submit" className="save-task-btn">
-							{isEdit ? "Save Changes" : "Save Task"}
+							{isEdit ? buttons.saveEdit : buttons.saveNew}
 						</button>
 					</div>
 				</form>
