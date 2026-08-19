@@ -5,6 +5,7 @@ import { NavBar } from "./Components/NavBar";
 import { AddTask } from "./Components/AddTask";
 import { type Task } from "./types";
 import "./App.css";
+import { APP_TEXT } from "./constants";
 
 // to get the current date
 function todayLocalISO() {
@@ -12,9 +13,7 @@ function todayLocalISO() {
 	const y = d.getFullYear();
 	const m = String(d.getMonth() + 1).padStart(2, "0");
 	const day = String(d.getDate()).padStart(2, "0");
-	{
-		console.log(`${y}-${m}-${day}`);
-	}
+
 	return `${y}-${m}-${day}`;
 }
 
@@ -31,6 +30,7 @@ function parseTasks(raw: string): Task[] | null {
 	}
 }
 export default function App() {
+	const { columns } = APP_TEXT;
 	const [tasks, setTasks] = useState<Task[]>(() => {
 		const savedTasks = localStorage.getItem("tasks");
 
@@ -58,8 +58,8 @@ export default function App() {
 	useEffect(() => {
 		try {
 			localStorage.setItem("tasks", JSON.stringify(tasks));
-		} catch (error) {
-			console.error(error);
+		} catch {
+			// just swallowing the error to avoid crashing the app
 		}
 	}, [tasks]);
 
@@ -142,7 +142,7 @@ export default function App() {
 			/>
 			<div className="board-container">
 				<TaskCol
-					title="To Do"
+					title={columns.todo}
 					isDoneColumn={false}
 					tasks={todoTasks}
 					onUpdateTaskStatus={updateTaskStatus}
@@ -151,7 +151,7 @@ export default function App() {
 				/>
 
 				<TaskCol
-					title="Done"
+					title={columns.done}
 					isDoneColumn={true}
 					tasks={doneTasks}
 					onUpdateTaskStatus={updateTaskStatus}

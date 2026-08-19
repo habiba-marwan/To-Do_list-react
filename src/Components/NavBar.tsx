@@ -1,6 +1,6 @@
 import React from "react";
 import "../App.css";
-
+import { APP_TEXT } from "../constants";
 interface NavBarProps {
 	onAddTask: () => void;
 	onSort: (method: "alphabetical" | "dueDate") => void;
@@ -16,6 +16,7 @@ export function NavBar({
 	onToggleTheme,
 	onFilterDate,
 }: NavBarProps) {
+	const { buttons } = APP_TEXT;
 	return (
 		<nav className="navbar">
 			<div className="nav-logo">
@@ -45,7 +46,7 @@ export function NavBar({
 					/>
 				</div>
 				<button className="add-task-btn" onClick={onAddTask}>
-					+ Add Task
+					{buttons.add}
 				</button>
 			</div>
 		</nav>

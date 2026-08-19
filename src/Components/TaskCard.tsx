@@ -1,6 +1,7 @@
 import React from "react";
 import { type Task } from "../types";
 import "../App.css";
+import { APP_TEXT } from "../constants";
 
 interface TaskCardProps {
 	task: Task;
@@ -15,6 +16,7 @@ export function TaskCard({
 	onDelete,
 	onEdit,
 }: TaskCardProps) {
+	const { buttons } = APP_TEXT;
 	const handleDragStart = (e: React.DragEvent) => {
 		e.dataTransfer.setData("taskId", task.id);
 	};
@@ -66,10 +68,10 @@ export function TaskCard({
 					if (window.confirm(`Delete "${task.title}"?`)) onDelete(task.id);
 				}}
 			>
-				Delete
+				{buttons.delete}
 			</button>
 			<button className="edit-btn" onClick={() => onEdit(task.id)}>
-				Edit
+				{buttons.edit}
 			</button>
 		</div>
 	);

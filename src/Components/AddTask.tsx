@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../App.css";
 import { type Task } from "../types";
+import { APP_TEXT } from "../constants";
 
 interface AddTaskProps {
 	isOpen: boolean;
@@ -26,7 +27,7 @@ export function AddTask({
 		initialData?.description || "",
 	);
 	const [deadline, setDeadline] = useState(initialData?.deadline || "");
-
+	const { modal, inputs, buttons } = APP_TEXT;
 	// wait till we click button
 	if (!isOpen) return null;
 
@@ -59,18 +60,18 @@ export function AddTask({
 				onClick={(e) => e.stopPropagation()}
 			>
 				<h2 id="task-modal-title" className="modal-title">
-					{isEdit ? "Let's edit your task" : "Let's add a new task"}
+					{isEdit ? modal.editTitle : modal.addTitle}
 				</h2>
 
 				<form onSubmit={handleSubmit} className="add-task-form">
 					<div className="input-group">
-						<label htmlFor="task-title">Task Title</label>
+						<label htmlFor="task-title">{inputs.title.label}</label>
 						<input
 							type="text"
 							id="task-title"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							placeholder="What needs to be done?"
+							placeholder={inputs.title.placeholder}
 							required
 							maxLength={200}
 							autoFocus
@@ -78,18 +79,18 @@ export function AddTask({
 					</div>
 
 					<div className="input-group">
-						<label htmlFor="task-desc">Description</label>
+						<label htmlFor="task-desc">{inputs.description.label}</label>
 						<textarea
 							id="task-desc"
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
-							placeholder="Add some details (optional)"
+							placeholder={inputs.description.placeholder}
 							maxLength={2000}
 						/>
 					</div>
 
 					<div className="input-group">
-						<label htmlFor="task-deadline">Deadline</label>
+						<label htmlFor="task-deadline">{inputs.deadline.label}</label>
 						<input
 							id="task-deadline"
 							type="date"
@@ -100,10 +101,10 @@ export function AddTask({
 
 					<div className="modal-actions">
 						<button type="button" className="cancel-btn" onClick={onClose}>
-							Cancel
+							{buttons.cancel}
 						</button>
 						<button type="submit" className="save-task-btn">
-							{isEdit ? "Save Changes" : "Save Task"}
+							{isEdit ? buttons.saveEdit : buttons.saveNew}
 						</button>
 					</div>
 				</form>
